@@ -70,7 +70,7 @@ app.get('/chat', async (req, res) => {
     const result = await retriever.invoke(userQuery)
 
     const SYSTEM_PROMPT = `
-    You are helfull AI Assistant who answeres the user query based on the available context from PDF File.
+    You are helful AI Assistant who answeres the user query based on the available context from PDF File.
     Context:
     ${JSON.stringify(result)}
     `;
