@@ -2,7 +2,7 @@
 
 import { SignIn } from "@clerk/nextjs"
 import { Lock } from "lucide-react"
-import Image from "next/image"
+// import Image from "next/image"
 
 export default function SignInPage() {
   return (
