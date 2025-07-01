@@ -85,10 +85,6 @@ const ChatComponent = () => {
 
   return (
     <div className="h-screen bg-black flex flex-col relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-black via-zinc-900 to-black" />
-      <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-gradient-to-br from-cyan-500/5 to-cyan-600/5 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-1/4 left-1/4 w-48 h-48 bg-gradient-to-tr from-cyan-400/5 to-cyan-500/5 rounded-full blur-2xl animate-pulse delay-1000" />
-
       <div className="relative z-10 border-b border-zinc-800/60 bg-zinc-900/80 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center gap-3">
