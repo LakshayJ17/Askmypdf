@@ -5,7 +5,7 @@ import { Upload, FileText, CheckCircle, AlertCircle, MessageCircle } from "lucid
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
-
+import { useUser } from "@clerk/nextjs"
 
 const FileUploadComponent = () => {
     const [isUploading, setIsUploading] = useState(false)
@@ -13,7 +13,9 @@ const FileUploadComponent = () => {
     const [fileName, setFileName] = useState<string>("")
     const [isStartingChat, setIsStartingChat] = useState(false)
     const router = useRouter()
+    const { user } = useUser()
 
+    const userId = user?.id;
 
     const handleFileUploadButtonClick = () => {
         const el = document.createElement("input")
@@ -31,6 +33,11 @@ const FileUploadComponent = () => {
                     try {
                         const formData = new FormData()
                         formData.append("pdf", file)
+                        formData.append("userId", userId ?? "")
+
+                        for (let pair of formData.entries()) {
+                            console.log(pair[0] + ':', pair[1]);
+                        }
 
                         await fetch("http://localhost:8000/upload/pdf", {
                             method: "POST",

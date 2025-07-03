@@ -39,6 +39,9 @@ app.use(cors())
 
 // upload.single('pdf') means we expect from frontend the pdf file with field name 'pdf' - ('pdf', file)
 app.post('/upload/pdf', upload.single('pdf'), async (req, res) => {
+    console.log(req.file)
+    console.log(req.body.userId)
+    
     await queue.add('file-ready', JSON.stringify({
 
         // Multer gives the properties - .originalname, .destination, .path
