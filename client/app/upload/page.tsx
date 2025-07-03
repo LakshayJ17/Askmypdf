@@ -35,10 +35,6 @@ const FileUploadComponent = () => {
                         formData.append("pdf", file)
                         formData.append("userId", userId ?? "")
 
-                        for (let pair of formData.entries()) {
-                            console.log(pair[0] + ':', pair[1]);
-                        }
-
                         await fetch("http://localhost:8000/upload/pdf", {
                             method: "POST",
                             body: formData,
