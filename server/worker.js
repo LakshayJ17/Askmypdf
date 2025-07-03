@@ -35,7 +35,7 @@ const worker = new Worker(
       embeddings,
       {
         url: 'http://localhost:6333',
-        collectionName: 'langchainjs-testing',
+        collectionName: `langchainjs-testing-${data.userId}`,
       }
     );
     await vectorStore.addDocuments(docs);

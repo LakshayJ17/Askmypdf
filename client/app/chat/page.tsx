@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { SendHorizontal, Bot, User, FileText, Loader2 } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
+import { useUser } from "@clerk/nextjs"
 
 interface Doc {
   pageContent: string
@@ -31,6 +32,8 @@ const ChatComponent = () => {
   const [isLoading, setIsLoading] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const { user } = useUser()
+  const userId = user?.id
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -49,7 +52,7 @@ const ChatComponent = () => {
     setIsLoading(true)
 
     try {
-      const res = await fetch(`http://localhost:8000/chat?message=${userMessage}`)
+      const res = await fetch(`http://localhost:8000/chat?message=${encodeURIComponent(userMessage)}&userId=${userId}`)
       const data = await res.json()
 
       console.log({ data })

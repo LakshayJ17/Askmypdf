@@ -39,21 +39,22 @@ app.use(cors())
 
 // upload.single('pdf') means we expect from frontend the pdf file with field name 'pdf' - ('pdf', file)
 app.post('/upload/pdf', upload.single('pdf'), async (req, res) => {
-    console.log(req.file)
-    console.log(req.body.userId)
     
     await queue.add('file-ready', JSON.stringify({
 
         // Multer gives the properties - .originalname, .destination, .path
         filename: req.file.originalname,
         source: req.file.destination,
-        path: req.file.path
+        path: req.file.path,
+        userId: req.body.userId
     }))
     return res.json({ message: "PDF Uploaded" })
 })
 
 app.get('/chat', async (req, res) => {
-    const userQuery = req.query.message
+    const userQuery = req.query.message;
+    const userId = req.query.userId;
+    const collectionName = `langchainjs-testing-${userId}`
 
     const embeddings = new OpenAIEmbeddings({
         model: 'text-embedding-3-small',
@@ -64,7 +65,7 @@ app.get('/chat', async (req, res) => {
         embeddings,
         {
             url: 'http://localhost:6333',
-            collectionName: 'langchainjs-testing',
+            collectionName: collectionName,
         }
     );
     const retriever = vectorStore.asRetriever({
@@ -72,8 +73,16 @@ app.get('/chat', async (req, res) => {
     })
     const result = await retriever.invoke(userQuery)
 
+    if (!result || result.length === 0) {
+        return res.json({
+            message: "Sorry, I could not find the answer in your document.",
+            docs: [],
+        });
+    }
+
     const SYSTEM_PROMPT = `
-    You are helful AI Assistant who answeres the user query based on the available context from PDF File.
+    You are a helpful AI Assistant. Only answer the user's query using the provided context from the PDF file below.
+    If the answer is not present in the context, reply: "Sorry, I could not find the answer in your document."
     Context:
     ${JSON.stringify(result)}
     `;
