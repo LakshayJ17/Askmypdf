@@ -8,6 +8,8 @@ import 'dotenv/config';
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
+const QDRANT_API_KEY =  process.env.QDRANT_API_KEY;
+const QDRANT_URL = process.env.QDRANT_URL;
 
 const worker = new Worker(
   'file-upload-queue',
@@ -34,7 +36,8 @@ const worker = new Worker(
     const vectorStore = await QdrantVectorStore.fromExistingCollection(
       embeddings,
       {
-        url: 'http://localhost:6333',
+        apiKey: QDRANT_API_KEY,
+        url: QDRANT_URL,
         collectionName: `langchainjs-testing-${data.userId}`,
       }
     );

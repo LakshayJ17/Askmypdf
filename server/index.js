@@ -9,6 +9,9 @@ import OpenAI from 'openai'
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
+const QDRANT_API_KEY =  process.env.QDRANT_API_KEY;
+const QDRANT_URL = process.env.QDRANT_URL;
+
 const client = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 // Queue name
@@ -64,8 +67,10 @@ app.get('/chat', async (req, res) => {
     const vectorStore = await QdrantVectorStore.fromExistingCollection(
         embeddings,
         {
-            url: 'http://localhost:6333',
-            collectionName: collectionName,
+            apiKey: QDRANT_API_KEY,
+            url: QDRANT_URL,
+            collectionName: collectionName
+            
         }
     );
     const retriever = vectorStore.asRetriever({
