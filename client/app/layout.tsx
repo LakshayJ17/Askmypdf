@@ -2,7 +2,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next"
-import { dark, neobrutalism, shadesOfPurple } from '@clerk/themes'
+import { dark } from '@clerk/themes'
 
 export const metadata: Metadata = {
   title: "AskMyPDF",
