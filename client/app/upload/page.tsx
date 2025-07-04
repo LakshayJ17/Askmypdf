@@ -68,7 +68,7 @@ const FileUploadComponent = () => {
     return (
         <div className="min-h-screen bg-black flex flex-col overflow-hidden">
             <Navbar />
-            <div className="flex-1 flex flex-col items-center justify-center">
+            <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-0">
                 <div className="flex flex-col justify-center items-center z-10 w-full max-w-md mx-auto">
                     <Card className="relative w-full bg-zinc-900/80 border-zinc-800/60 shadow-2xl backdrop-blur-sm overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyan-500/10 to-cyan-600/10 rounded-full blur-3xl animate-pulse" />
