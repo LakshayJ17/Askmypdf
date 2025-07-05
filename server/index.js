@@ -6,6 +6,7 @@ import { Queue } from 'bullmq'
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { QdrantVectorStore } from '@langchain/qdrant';
 import OpenAI from 'openai'
+import IORedis from 'ioredis'
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
@@ -13,13 +14,15 @@ const QDRANT_API_KEY =  process.env.QDRANT_API_KEY;
 const QDRANT_URL = process.env.QDRANT_URL;
 
 // Redis connection configuration
-const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
+const redis = new IORedis(process.env.REDIS_URL, {
+  maxRetriesPerRequest: null
+});
 
 const client = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 // Queue name
 const queue = new Queue('file-upload-queue', {
-    connection: REDIS_URL
+    connection: redis
 })
 
 // This will give each uploaded file a unique filename 
@@ -41,6 +44,7 @@ app.use(cors())
 
 // upload.single('pdf') means we expect from frontend the pdf file with field name 'pdf' - ('pdf', file)
 app.post('/upload/pdf', upload.single('pdf'), async (req, res) => {
+    console.log('Received PDF upload:', req.file);
     
     await queue.add('file-ready', JSON.stringify({
 

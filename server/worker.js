@@ -1,10 +1,9 @@
 import { Worker } from 'bullmq';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { QdrantVectorStore } from '@langchain/qdrant';
-import { Document } from '@langchain/core/documents';
 import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf';
-import { CharacterTextSplitter } from '@langchain/textsplitters';
 import 'dotenv/config';
+import IORedis from 'ioredis';
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
@@ -12,12 +11,14 @@ const QDRANT_API_KEY =  process.env.QDRANT_API_KEY;
 const QDRANT_URL = process.env.QDRANT_URL;
 
 // Redis connection configuration
-const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
+const redis = new IORedis(process.env.REDIS_URL, {
+  maxRetriesPerRequest: null
+});
 
 const worker = new Worker(
   'file-upload-queue',
   async (job) => {
-    console.log(`Job:`, job.data);
+    console.log('Worker received job:', job.data);
     const data = JSON.parse(job.data);
     /*
     Path: data.path
@@ -49,6 +50,6 @@ const worker = new Worker(
   },
   {
     concurrency: 100,
-    connection: REDIS_URL,
+    connection: redis,
   }
 );
