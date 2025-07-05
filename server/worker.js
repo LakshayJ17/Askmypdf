@@ -11,6 +11,9 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const QDRANT_API_KEY =  process.env.QDRANT_API_KEY;
 const QDRANT_URL = process.env.QDRANT_URL;
 
+// Redis connection configuration
+const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
+
 const worker = new Worker(
   'file-upload-queue',
   async (job) => {
@@ -46,9 +49,6 @@ const worker = new Worker(
   },
   {
     concurrency: 100,
-    connection: {
-      host: 'localhost',
-      port: '6379',
-    },
+    connection: REDIS_URL,
   }
 );

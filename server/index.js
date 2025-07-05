@@ -12,16 +12,15 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const QDRANT_API_KEY =  process.env.QDRANT_API_KEY;
 const QDRANT_URL = process.env.QDRANT_URL;
 
+// Redis connection configuration
+const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
+
 const client = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 // Queue name
 const queue = new Queue('file-upload-queue', {
-    connection: {
-        host: 'localhost',
-        port: '6379'
-    }
+    connection: REDIS_URL
 })
-
 
 // This will give each uploaded file a unique filename 
 const storage = multer.diskStorage({
