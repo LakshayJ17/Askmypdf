@@ -22,7 +22,7 @@ export default function Home() {
   return (
     <section className="relative w-full h-screen bg-black overflow-hidden">
       <Navbar />
-      <div className="absolute inset-x-0 top-16 bottom-0 z-0 overflow-hidden">
+      <div className="absolute inset-x-0 top-20 bottom-0 z-0 overflow-hidden">
         <BackgroundLines className="w-full h-full" />
       </div>
 
