@@ -7,6 +7,7 @@ import { OpenAIEmbeddings } from '@langchain/openai';
 import { QdrantVectorStore } from '@langchain/qdrant';
 import OpenAI from 'openai'
 import IORedis from 'ioredis'
+import fs from 'fs'
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
@@ -24,6 +25,11 @@ const client = new OpenAI({ apiKey: OPENAI_API_KEY });
 const queue = new Queue('file-upload-queue', {
     connection: redis
 })
+
+const uploadDir = 'uploads';
+if (!fs.existsSync(uploadDir)){
+    fs.mkdirSync(uploadDir);
+}
 
 // This will give each uploaded file a unique filename 
 const storage = multer.diskStorage({
