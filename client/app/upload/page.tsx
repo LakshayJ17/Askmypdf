@@ -36,7 +36,7 @@ const FileUploadComponent = () => {
                         formData.append("pdf", file)
                         formData.append("userId", userId ?? "")
 
-                        await fetch("http://localhost:8000/upload/pdf", {
+                        await fetch("https://askmypdf-lvjn.onrender.com/upload/pdf", {
                             method: "POST",
                             body: formData,
                         })

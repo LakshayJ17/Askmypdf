@@ -52,7 +52,7 @@ const ChatComponent = () => {
     setIsLoading(true)
 
     try {
-      const res = await fetch(`http://localhost:8000/chat?message=${encodeURIComponent(userMessage)}&userId=${userId}`)
+      const res = await fetch(`https://askmypdf-lvjn.onrender.com/chat?message=${encodeURIComponent(userMessage)}&userId=${userId}`)
       const data = await res.json()
 
       console.log({ data })
