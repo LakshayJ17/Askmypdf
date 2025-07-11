@@ -60,11 +60,16 @@ import { OpenAIEmbeddings } from '@langchain/openai';
 import { QdrantVectorStore } from '@langchain/qdrant';
 import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf';
 import 'dotenv/config'
+import IORedis from 'ioredis'
+
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const QDRANT_API_KEY = process.env.QDRANT_API_KEY;
 const QDRANT_URL = process.env.QDRANT_URL;
 const REDIS_URL = process.env.REDIS_URL;
+
+const redis = new IORedis(REDIS_URL)
+
 
 const worker = new Worker(
   'file-upload-queue',
@@ -101,6 +106,6 @@ const worker = new Worker(
   },
   {
     concurrency: 100,
-    connection: REDIS_URL
+    connection: redis
   }
 );
