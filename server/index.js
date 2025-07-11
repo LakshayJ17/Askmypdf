@@ -11,12 +11,12 @@ import fs from 'fs'
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-const QDRANT_API_KEY = process.env.QDRANT_API_KEY;
+const QDRANT_API_KEY =  process.env.QDRANT_API_KEY;
 const QDRANT_URL = process.env.QDRANT_URL;
 
 // Redis connection configuration
 const redis = new IORedis(process.env.REDIS_URL, {
-    maxRetriesPerRequest: null
+  maxRetriesPerRequest: null
 });
 
 const client = new OpenAI({ apiKey: OPENAI_API_KEY });
@@ -27,7 +27,7 @@ const queue = new Queue('file-upload-queue', {
 })
 
 const uploadDir = 'uploads';
-if (!fs.existsSync(uploadDir)) {
+if (!fs.existsSync(uploadDir)){
     fs.mkdirSync(uploadDir);
 }
 
@@ -51,24 +51,15 @@ app.use(cors())
 // upload.single('pdf') means we expect from frontend the pdf file with field name 'pdf' - ('pdf', file)
 app.post('/upload/pdf', upload.single('pdf'), async (req, res) => {
     console.log('Received PDF upload:', req.file);
-
+    
     await queue.add('file-ready', JSON.stringify({
+
         // Multer gives the properties - .originalname, .destination, .path
         filename: req.file.originalname,
         source: req.file.destination,
         path: req.file.path,
         userId: req.body.userId
-    }),
-        {
-            attempts: 3, // Retry 3 times max
-            backoff: {
-                type: 'exponential',
-                delay: 5000,
-            },
-            removeOnComplete: true,
-            removeOnFail: 5
-        });
-
+    }))
     return res.json({ message: "PDF Uploaded" })
 })
 
@@ -88,7 +79,7 @@ app.get('/chat', async (req, res) => {
             apiKey: QDRANT_API_KEY,
             url: QDRANT_URL,
             collectionName: collectionName
-
+            
         }
     );
     const retriever = vectorStore.asRetriever({
@@ -112,7 +103,7 @@ app.get('/chat', async (req, res) => {
 
     const chatResult = await client.chat.completions.create({
         model: 'gpt-4.1',
-        messages: [
+        messages : [
             { "role": "system", "content": SYSTEM_PROMPT },
             { "role": "user", "content": userQuery }
         ]
