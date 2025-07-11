@@ -37,7 +37,7 @@ const worker = new Worker(
       const collectionName = `langchainjs-testing-${data.userId}`;
       
       // Always resolve the path relative to the project root
-      const actualPath = path.resolve(__dirname, '..', data.path);
+      const actualPath = path.join(process.cwd(), data.path);
       console.log('Resolved file path:', actualPath);
 
       if (!fs.existsSync(actualPath)) {
