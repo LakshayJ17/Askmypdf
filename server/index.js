@@ -148,7 +148,7 @@ const QDRANT_API_KEY = process.env.QDRANT_API_KEY;
 const QDRANT_URL = process.env.QDRANT_URL;
 const REDIS_URL = process.env.REDIS_URL;
 
-const redis = new IORedis(REDIS_URL)
+const redis = new IORedis(REDIS_URL, { maxRetriesPerRequest: null })
 
 const client = new OpenAI({
     apiKey: OPENAI_API_KEY,
