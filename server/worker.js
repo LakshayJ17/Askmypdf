@@ -28,25 +28,35 @@ const worker = new Worker(
     store the chunk in qdrant db
     */
 
-    // Load the PDF
-    const loader = new PDFLoader(data.path);
-    const docs = await loader.load();
+    try {
+      console.log('Loading PDF from:', data.path);
+      const loader = new PDFLoader(data.path);
+      const docs = await loader.load();
+      console.log('Loaded docs:', docs.length);
 
-    const embeddings = new OpenAIEmbeddings({
-      model: 'text-embedding-3-small',
-      apiKey: OPENAI_API_KEY
-    });
+      const embeddings = new OpenAIEmbeddings({
+        model: 'text-embedding-3-small',
+        apiKey: OPENAI_API_KEY
+      });
 
-    const vectorStore = await QdrantVectorStore.fromExistingCollection(
-      embeddings,
-      {
-        apiKey: QDRANT_API_KEY,
-        url: QDRANT_URL,
-        collectionName: `langchainjs-testing-${data.userId}`,
+      const vectorStore = await QdrantVectorStore.fromExistingCollection(
+        embeddings,
+        {
+          apiKey: QDRANT_API_KEY,
+          url: QDRANT_URL,
+          collectionName: `langchainjs-testing-${data.userId}`,
+        }
+      );
+
+      try {
+        await vectorStore.addDocuments(docs);
+        console.log('Successfully added docs to Qdrant');
+      } catch (err) {
+        console.error('Error adding documents to Qdrant:', err);
       }
-    );
-    await vectorStore.addDocuments(docs);
-    console.log(`All docs are added to vector store`);
+    } catch (err) {
+      console.error('Worker job failed:', err);
+    }
   },
   {
     concurrency: 100,
