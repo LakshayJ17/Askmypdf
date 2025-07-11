@@ -52,6 +52,7 @@ const ChatComponent = () => {
     setIsLoading(true)
 
     try {
+      // const res = await fetch(`http://localhost:8000/chat?message=${encodeURIComponent(userMessage)}&userId=${userId}`)
       const res = await fetch(`https://askmypdfapi.up.railway.app/chat?message=${encodeURIComponent(userMessage)}&userId=${userId}`)
       const data = await res.json()
 
