@@ -11,7 +11,7 @@ import IORedis from 'ioredis'
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const QDRANT_API_KEY = process.env.QDRANT_API_KEY;
 const QDRANT_URL = process.env.QDRANT_URL;
-const REDIS_URL = process.env.REDIS_URL;
+const REDIS_URL = process.env.REDIS_PUBLIC_URL;
 
 const redis = new IORedis(REDIS_URL, { maxRetriesPerRequest: null })
 
