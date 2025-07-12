@@ -13,15 +13,7 @@ const QDRANT_API_KEY = process.env.QDRANT_API_KEY;
 const QDRANT_URL = process.env.QDRANT_URL;
 const REDIS_URL = process.env.REDIS_URL || process.env.REDIS_PUBLIC_URL;
 
-const redis = new IORedis(REDIS_URL, { 
-    maxRetriesPerRequest: null,
-    retryDelayOnFailover: 100,
-    enableReadyCheck: false,
-    lazyConnect: true,
-    keepAlive: 30000,
-    connectTimeout: 10000,
-    commandTimeout: 5000
-});
+const redis = new IORedis(REDIS_URL, { family: 0 }); // family: 0 enables both IPv4 and IPv6
 
 // Add Redis connection error handling
 redis.on('error', (err) => {
@@ -35,6 +27,8 @@ redis.on('connect', () => {
 redis.on('ready', () => {
     console.log('Redis is ready');
 });
+
+const redisURL = new URL(REDIS_URL);
 
 const worker = new Worker(
   'file-upload-queue',
@@ -120,10 +114,15 @@ const worker = new Worker(
   },
   {
     concurrency: 5, // Reduced from 100 to avoid overwhelming the system
-    connection: redis,
+    connection: {
+      host: redisURL.hostname,
+      port: redisURL.port,
+      username: redisURL.username,
+      password: redisURL.password,
+      family: 0, // <--- This is the fix!
+    },
     removeOnComplete: { count: 10 },
     removeOnFail: { count: 50 },
-
   }
 );
 

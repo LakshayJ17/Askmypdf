@@ -24,24 +24,8 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 })
 
-const storage = new CloudinaryStorage({
-    cloudinary,
-    params: {
-        folder: 'askmypdf_uploads',
-        resource_type: 'raw'
-    }
-})
 
-const redis = new IORedis(REDIS_URL, { 
-    maxRetriesPerRequest: null,
-    retryDelayOnFailover: 100,
-    enableReadyCheck: false,
-    maxRetriesPerRequest: null,
-    lazyConnect: true,
-    keepAlive: 30000,
-    connectTimeout: 10000,
-    commandTimeout: 5000
-});
+const redis = new IORedis(REDIS_URL, { family: 0 }); // family: 0 enables both IPv4 and IPv6
 
 // Add Redis connection error handling
 redis.on('error', (err) => {
@@ -61,7 +45,13 @@ const client = new OpenAI({
 });
 
 const queue = new Queue('file-upload-queue', {
-    connection: redis
+    connection: {
+        host: new URL(REDIS_URL).hostname,
+        port: new URL(REDIS_URL).port,
+        username: new URL(REDIS_URL).username,
+        password: new URL(REDIS_URL).password,
+        family: 0, // <--- This is the fix!
+    }
 });
 
 // const storage = multer.diskStorage({
@@ -73,6 +63,14 @@ const queue = new Queue('file-upload-queue', {
 //         cb(null, `${uniqueSuffix}-${file.originalname}`);
 //     },
 // });
+
+const storage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+        folder: 'askmypdf_uploads',
+        resource_type: 'raw'
+    }
+})
 
 const upload = multer({ storage: storage });
 
