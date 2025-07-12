@@ -36,17 +36,19 @@ const FileUploadComponent = () => {
                         formData.append("pdf", file)
                         formData.append("userId", userId ?? "")
 
-                        // await fetch("http://localhost:8000/upload/pdf", {
-                        //     method: "POST",
-                        //     body: formData,
-                        // })
-                        await fetch("https://askmypdfapi.up.railway.app/upload/pdf", {
+                        const response = await fetch("https://askmypdfapi.up.railway.app/upload/pdf", {
                             method: "POST",
                             body: formData,
                         })
+                        const data = await response.json();
 
-                        console.log("file uploaded")
-                        setUploadStatus("success")
+                        if (!response.ok || data?.message !== "uploaded") {
+                            setUploadStatus("error")
+                            console.error("Upload failed:", data?.error || data?.message)
+                        } else {
+                            setUploadStatus("success")
+                            console.log("file uploaded")
+                        }
                     } catch (error) {
                         console.error("Upload failed:", error)
                         setUploadStatus("error")

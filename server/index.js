@@ -178,68 +178,80 @@ app.get('/', (req, res) => {
 });
 
 app.post('/upload/pdf', upload.single('pdf'), async (req, res) => {
-    console.log('Received PDF upload:', req.file);
-    
-    await queue.add(
-        'file-ready',
-        {
-            filename: req.file.originalname,
-            destination: req.file.destination,
-            path: req.file.path,
-            userId: req.body.userId
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded.' });
         }
-    );
-    return res.json({ message: 'uploaded' });
+        console.log('Received PDF upload:', req.file);
+        await queue.add(
+            'file-ready',
+            {
+                filename: req.file.originalname,
+                destination: req.file.destination,
+                path: req.file.path,
+                userId: req.body.userId
+            }
+        );
+        return res.json({ message: 'uploaded' });
+    } catch (error) {
+        console.error('Upload error:', error);
+        return res.status(500).json({ message: 'Upload not successful', error: error.message });
+    }
 });
 
 app.get('/chat', async (req, res) => {
-    const userQuery = req.query.message;
-    const userId = req.query.userId;
+    try {
+        const userQuery = req.query.message;
+        const userId = req.query.userId;
 
-    const embeddings = new OpenAIEmbeddings({
-        model: 'text-embedding-3-small',
-        apiKey: OPENAI_API_KEY,
-    });
-
-    const vectorStore = await QdrantVectorStore.fromExistingCollection(
-        embeddings,
-        {
-            apiKey: QDRANT_API_KEY,
-            url: QDRANT_URL,
-            collectionName: `askmypdf-${userId}`
-        }
-    );
-    const ret = vectorStore.asRetriever({
-        k: 2,
-    });
-    const result = await ret.invoke(userQuery);
-
-    if (!result || result.length === 0) {
-        return res.json({
-            message: "Sorry, I could not find the answer in your document.",
-            docs: [],
+        const embeddings = new OpenAIEmbeddings({
+            model: 'text-embedding-3-small',
+            apiKey: OPENAI_API_KEY,
         });
+
+        const vectorStore = await QdrantVectorStore.fromExistingCollection(
+            embeddings,
+            {
+                apiKey: QDRANT_API_KEY,
+                url: QDRANT_URL,
+                collectionName: `askmypdf-${userId}`
+            }
+        );
+        const ret = vectorStore.asRetriever({
+            k: 2,
+        });
+        const result = await ret.invoke(userQuery);
+
+        if (!result || result.length === 0) {
+            return res.json({
+                message: "Sorry, I could not find the answer in your document.",
+                docs: [],
+            });
+        }
+
+        const SYSTEM_PROMPT = `
+         You are a helpful AI Assistant. Only answer the user's query using the provided context from the PDF file below.
+         If the answer is not present in the context, reply: "Sorry, I could not find the answer in your document."
+         Context:
+         ${JSON.stringify(result)}
+        `;
+
+        const chatResult = await client.chat.completions.create({
+            model: 'gpt-4.1',
+            messages: [
+                { role: 'system', content: SYSTEM_PROMPT },
+                { role: 'user', content: userQuery },
+            ],
+        });
+
+        return res.json({
+            message: chatResult.choices[0].message.content,
+            docs: result,
+        });
+    } catch (error) {
+        console.error('Chat error:', error);
+        return res.status(500).json({ message: 'Error processing chat request', error: error.message });
     }
-
-    const SYSTEM_PROMPT = `
-     You are a helpful AI Assistant. Only answer the user's query using the provided context from the PDF file below.
-     If the answer is not present in the context, reply: "Sorry, I could not find the answer in your document."
-     Context:
-     ${JSON.stringify(result)}
-    `;
-
-    const chatResult = await client.chat.completions.create({
-        model: 'gpt-4.1',
-        messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
-            { role: 'user', content: userQuery },
-        ],
-    });
-
-    return res.json({
-        message: chatResult.choices[0].message.content,
-        docs: result,
-    });
 });
 
 const PORT = process.env.PORT || 8000;
