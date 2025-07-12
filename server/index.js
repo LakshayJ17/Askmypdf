@@ -179,7 +179,7 @@ app.get('/', (req, res) => {
 
 app.post('/upload/pdf', upload.single('pdf'), async (req, res) => {
     console.log('Received PDF upload:', req.file);
-
+    
     await queue.add(
         'file-ready',
         {
