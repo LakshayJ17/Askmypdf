@@ -136,17 +136,35 @@ import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import { Queue } from 'bullmq';
-import { OpenAIEmbeddings } from '@langchain/openai';
-import { QdrantVectorStore } from '@langchain/qdrant';
+import { OpenAIEmbeddings } from '@langchain/openai'
+import { QdrantVectorStore } from '@langchain/qdrant'
 import OpenAI from 'openai';
 import 'dotenv/config'
 import IORedis from 'ioredis'
+import pkg from 'cloudinary'
+import { CloudinaryStorage } from 'multer-storage-cloudinary'
 
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const QDRANT_API_KEY = process.env.QDRANT_API_KEY;
 const QDRANT_URL = process.env.QDRANT_URL;
 const REDIS_URL = process.env.REDIS_URL;
+
+const { v2: cloudinary } = pkg;
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+})
+
+const storage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+        folder: 'askmypdf_uploads',
+        resource_type: 'raw'
+    }
+})
 
 const redis = new IORedis(REDIS_URL, { maxRetriesPerRequest: null })
 
@@ -158,15 +176,15 @@ const queue = new Queue('file-upload-queue', {
     connection: redis
 });
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/');
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, `${uniqueSuffix}-${file.originalname}`);
-    },
-});
+// const storage = multer.diskStorage({
+//     destination: function (req, file, cb) {
+//         cb(null, 'uploads/');
+//     },
+//     filename: function (req, file, cb) {
+//         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+//         cb(null, `${uniqueSuffix}-${file.originalname}`);
+//     },
+// });
 
 const upload = multer({ storage: storage });
 
@@ -186,9 +204,10 @@ app.post('/upload/pdf', upload.single('pdf'), async (req, res) => {
         await queue.add(
             'file-ready',
             {
+                url: req.file.path,
                 filename: req.file.originalname,
-                destination: req.file.destination,
-                path: req.file.path,
+                // destination: req.file.destination,
+                // path: req.file.path,
                 userId: req.body.userId
             }
         );

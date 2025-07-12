@@ -17,11 +17,13 @@
     "@langchain/qdrant": "^0.1.2",
     "@langchain/textsplitters": "^0.1.0",
     "bullmq": "^5.53.2",
+    "cloudinary": "^1.41.3",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
     "langchain": "^0.3.28",
     "multer": "^2.0.1",
+    "multer-storage-cloudinary": "^4.0.0",
     "openai": "^4.62.1",
     "pdf-parse": "^1.1.1"
   },

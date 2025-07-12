@@ -4,6 +4,7 @@ import { QdrantVectorStore } from '@langchain/qdrant';
 import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import 'dotenv/config'
 import IORedis from 'ioredis'
 
@@ -12,31 +13,33 @@ const QDRANT_API_KEY = process.env.QDRANT_API_KEY;
 const QDRANT_URL = process.env.QDRANT_URL;
 const REDIS_URL = process.env.REDIS_URL;
 
-// Create uploads directory if it doesn't exist
-const uploadsDir = path.join(process.cwd(), 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-  console.log('Created uploads directory');
-}
-
 const redis = new IORedis(REDIS_URL, { maxRetriesPerRequest: null })
 
 const worker = new Worker(
   'file-upload-queue',
   async (job) => {
+    console.log('Worker received job:', job.data);
     try {
       console.log(`Job:`, job.data);
       const data = job.data;
 
-      // Verify file exists before processing
-      if (!fs.existsSync(data.path)) {
-        throw new Error(`File not found at path: ${data.path}`);
-      }
 
-      console.log(`Processing file: ${data.path}`);
+      // Download PDF from Cloudinary URL to a temp file
+      if (!data.url) {
+        throw new Error('No file URL provided in job data');
+      }
+      const tempPath = path.join(os.tmpdir(), `${Date.now()}-temp.pdf`);
+      const response = await fetch(data.url);
+      if (!response.ok) {
+        throw new Error(`Failed to download PDF from URL: ${data.url}`);
+      }
+      const arrayBuffer = await response.arrayBuffer();
+      fs.writeFileSync(tempPath, Buffer.from(arrayBuffer));
+
+      console.log(`Downloaded PDF to: ${tempPath}`);
 
       // Load the PDF
-      const loader = new PDFLoader(data.path);
+      const loader = new PDFLoader(tempPath);
       const docs = await loader.load();
 
       if (!docs || docs.length === 0) {
@@ -80,12 +83,13 @@ const worker = new Worker(
 
       console.log(`Successfully added ${docs.length} documents to vector store`);
 
-      // Clean up the uploaded file after processing
+
+      // Clean up the temp file after processing
       try {
-        fs.unlinkSync(data.path);
-        console.log(`Cleaned up file: ${data.path}`);
+        fs.unlinkSync(tempPath);
+        console.log(`Cleaned up temp file: ${tempPath}`);
       } catch (cleanupError) {
-        console.warn(`Failed to clean up file: ${cleanupError.message}`);
+        console.warn(`Failed to clean up temp file: ${cleanupError.message}`);
       }
 
     } catch (error) {
@@ -96,8 +100,9 @@ const worker = new Worker(
   {
     concurrency: 5, // Reduced from 100 to avoid overwhelming the system
     connection: redis,
-    removeOnComplete: 10, // Keep last 10 completed jobs
-    removeOnFail: 50, // Keep last 50 failed jobs
+    removeOnComplete: { count: 10 },
+    removeOnFail: { count: 50 },
+
   }
 );
 

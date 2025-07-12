@@ -40,6 +40,10 @@ const FileUploadComponent = () => {
                             method: "POST",
                             body: formData,
                         })
+                        // const response = await fetch("http://localhost:8000/upload/pdf", {
+                        //     method: "POST",
+                        //     body: formData,
+                        // })
                         const data = await response.json();
 
                         if (!response.ok || data?.message !== "uploaded") {
