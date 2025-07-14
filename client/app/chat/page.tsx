@@ -52,8 +52,29 @@ const ChatComponent = () => {
     setIsLoading(true)
 
     try {
-      // const res = await fetch(`http://localhost:8000/chat?message=${encodeURIComponent(userMessage)}&userId=${userId}`)
-      const res = await fetch(`https://askmypdfapi.up.railway.app/chat?message=${encodeURIComponent(userMessage)}&userId=${userId}`)
+      // const res = await fetch('http://localhost:8000/chat', {
+      //   method: "POST",
+      //   body: JSON.stringify({
+      //     message: userMessage,
+      //     userId: userId
+      //   }),
+      //   headers: {
+      //     "Content-type": "application/json; charset=UTF-8"
+      //   }
+      // })
+
+      
+      const res = await fetch('https://askmypdfapi.up.railway.app/chat', {
+        method: "POST",
+        body: JSON.stringify({
+          message: userMessage,
+          userId: userId
+        }),
+        headers: {
+          "Content-type": "application/json; charset=UTF-8"
+        }
+      })
+
       const data = await res.json()
 
       console.log({ data })
@@ -129,11 +150,10 @@ const ChatComponent = () => {
 
                 <div className={`max-w-[70%] ${msg.role === "user" ? "order-first" : ""}`}>
                   <Card
-                    className={`p-4 ${
-                      msg.role === "user"
+                    className={`p-4 ${msg.role === "user"
                         ? "bg-gradient-to-r from-cyan-500 to-cyan-600 text-black border-none"
                         : "bg-zinc-800/60 border-zinc-700/60 text-white"
-                    } backdrop-blur-sm`}
+                      } backdrop-blur-sm`}
                   >
                     <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
 

@@ -77,6 +77,8 @@ const upload = multer({ storage: storage });
 const app = express();
 app.use(cors());
 
+app.use(express.json())
+
 app.get('/', (req, res) => {
     return res.json({ status: 'All Good!' });
 });
@@ -104,10 +106,11 @@ app.post('/upload/pdf', upload.single('pdf'), async (req, res) => {
     }
 });
 
-app.get('/chat', async (req, res) => {
+
+app.post('/chat', async (req, res) => {
     try {
-        const userQuery = req.query.message;
-        const userId = req.query.userId;
+        const userQuery = req.body.message;
+        const userId = req.body.userId;
 
         const embeddings = new OpenAIEmbeddings({
             model: 'text-embedding-3-small',
@@ -122,10 +125,10 @@ app.get('/chat', async (req, res) => {
                 collectionName: `askmypdf-${userId}`
             }
         );
-        const ret = vectorStore.asRetriever({
+        const retriever = vectorStore.asRetriever({
             k: 2,
         });
-        const result = await ret.invoke(userQuery);
+        const result = await retriever.invoke(userQuery);
 
         if (!result || result.length === 0) {
             return res.json({
@@ -157,7 +160,7 @@ app.get('/chat', async (req, res) => {
         console.error('Chat error:', error);
         return res.status(500).json({ message: 'Error processing chat request', error: error.message });
     }
-});
+})
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
