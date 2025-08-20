@@ -25,7 +25,7 @@ cloudinary.config({
 })
 
 
-const redis = new IORedis(REDIS_URL, { family: 0 }); // family: 0 enables both IPv4 and IPv6
+const redis = new IORedis(REDIS_URL, { family: 0 }); 
 
 // Add Redis connection error handling
 redis.on('error', (err) => {
@@ -72,7 +72,11 @@ const storage = new CloudinaryStorage({
     }
 })
 
-const upload = multer({ storage: storage });
+// const upload = multer({ storage: storage });
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 } 
+});
 
 const app = express();
 app.use(cors());

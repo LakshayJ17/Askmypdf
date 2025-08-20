@@ -17,15 +17,15 @@ const redis = new IORedis(REDIS_URL, { family: 0 }); // family: 0 enables both I
 
 // Add Redis connection error handling
 redis.on('error', (err) => {
-    console.error('Redis connection error:', err);
+  console.error('Redis connection error:', err);
 });
 
 redis.on('connect', () => {
-    console.log('Connected to Redis');
+  console.log('Connected to Redis');
 });
 
 redis.on('ready', () => {
-    console.log('Redis is ready');
+  console.log('Redis is ready');
 });
 
 const redisURL = new URL(REDIS_URL);
@@ -101,7 +101,11 @@ const worker = new Worker(
 
       // Clean up the temp file after processing
       try {
-        fs.unlinkSync(tempPath);
+        // fs.unlinkSync(tempPath);
+        fs.unlink(tempPath, (err) => {
+          if (err) console.warn(`Failed to clean temp file: ${err.message}`);
+        });
+
         console.log(`Cleaned up temp file: ${tempPath}`);
       } catch (cleanupError) {
         console.warn(`Failed to clean up temp file: ${cleanupError.message}`);
@@ -109,17 +113,17 @@ const worker = new Worker(
 
     } catch (error) {
       console.error('Worker error:', error);
-      throw error; // Re-throw to mark job as failed
+      throw error; 
     }
   },
   {
-    concurrency: 5, // Reduced from 100 to avoid overwhelming the system
+    concurrency: 5, 
     connection: {
       host: redisURL.hostname,
       port: redisURL.port,
       username: redisURL.username,
       password: redisURL.password,
-      family: 0, // <--- This is the fix!
+      family: 0,
     },
     removeOnComplete: { count: 10 },
     removeOnFail: { count: 50 },
