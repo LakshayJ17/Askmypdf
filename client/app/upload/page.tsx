@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
 import { useUser } from "@clerk/nextjs"
 import Navbar from "../components/navbar"
+import { BACKEND_URL } from "@/config"
 
 const FileUploadComponent = () => {
     const [isUploading, setIsUploading] = useState(false)
@@ -36,7 +37,7 @@ const FileUploadComponent = () => {
                         formData.append("pdf", file)
                         formData.append("userId", userId ?? "")
 
-                        const response = await fetch("https://askmypdfapi.up.railway.app/upload/pdf", {
+                        const response = await fetch(`${BACKEND_URL}/upload/pdf`, {
                             method: "POST",
                             body: formData,
                         })

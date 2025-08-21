@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch index.js",
-    "dev:worker": "node --watch worker.js"
+    "start": "node index.js"
   },
   "author": "",
   "license": "ISC",

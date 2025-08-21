@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { SendHorizontal, Bot, User, FileText, Loader2 } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 import { useUser } from "@clerk/nextjs"
+import { BACKEND_URL } from "@/config"
 
 interface Doc {
   pageContent: string
@@ -64,7 +65,7 @@ const ChatComponent = () => {
       // })
 
       
-      const res = await fetch('https://askmypdfapi.up.railway.app/chat', {
+      const res = await fetch(`${BACKEND_URL}/chat`, {
         method: "POST",
         body: JSON.stringify({
           message: userMessage,
