@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
 import { useUser } from "@clerk/nextjs"
-import Navbar from "../components/navbar"
 import { BACKEND_URL } from "@/config"
 
 
@@ -359,7 +358,6 @@ const FileUploadComponent = () => {
 
     return (
         <div className="min-h-screen bg-black flex flex-col items-center overflow-hidden">
-            <Navbar />
             <div className="flex-1 flex flex-col items-center justify-center w-full px-4 sm:px-0">
                 <div className="flex flex-col justify-center items-center z-10 w-full max-w-lg mx-auto">
 
