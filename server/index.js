@@ -10,9 +10,12 @@ import IORedis from 'ioredis'
 import pkg from 'cloudinary'
 import { CloudinaryStorage } from 'multer-storage-cloudinary'
 import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf';
+import { RecursiveUrlLoader } from "@langchain/community/document_loaders/web/recursive_url";
+import { compile } from "html-to-text";
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const QDRANT_API_KEY = process.env.QDRANT_API_KEY;
@@ -88,6 +91,72 @@ app.post('/upload/pdf', upload.single('pdf'), async (req, res) => {
     }
 });
 
+app.post('/upload/url', async (req, res) => {
+    try {
+        const { inputUrl, userId } = req.body;
+        if (!inputUrl || !userId) {
+            return res.status(400).json({ message: "Url and userId required" });
+        }
+
+        const compiledConvert = compile({ wordwrap: 130 });
+
+        // Load and extract documents from the URL
+        const loader = new RecursiveUrlLoader(inputUrl, {
+            extractor: compiledConvert,
+            maxDepth: 1,
+            excludeDirs: ["/docs/api/"],
+        });
+        const docs = await loader.load();
+        if (!docs || docs.length === 0) {
+            return res.status(400).json({ message: "No content extracted from URL" });
+        }
+
+        const splitter = new RecursiveCharacterTextSplitter({
+            chunkSize: 2000,
+            chunkOverlap: 200
+        })
+
+        const splitDocs = await splitter.splitDocuments(docs);
+        
+        const embeddings = new OpenAIEmbeddings({
+            model: 'text-embedding-3-small',
+            apiKey: OPENAI_API_KEY,
+        });
+
+        const collectionName = `askmypdf-${userId}`;
+        console.log(`Using collection: ${collectionName}`);
+
+        try {
+            // Try to connect to existing collection
+            const vectorStore = await QdrantVectorStore.fromExistingCollection(
+                embeddings,
+                {
+                    apiKey: QDRANT_API_KEY,
+                    url: QDRANT_URL,
+                    collectionName: collectionName
+                }
+            );
+            await vectorStore.addDocuments(splitDocs);
+        } catch (error) {
+            console.log('Collection does not exist, creating new one...');
+            // If collection doesn't exist, create it
+            await QdrantVectorStore.fromDocuments(
+                splitDocs,
+                embeddings,
+                {
+                    apiKey: QDRANT_API_KEY,
+                    url: QDRANT_URL,
+                    collectionName: collectionName
+                }
+            );
+        }
+
+        return res.json({ message: "URL uploaded and processed successfully" });
+    } catch (error) {
+        console.error('Upload URL error:', error);
+        return res.status(500).json({ message: "Error in parsing URL", error: error.message });
+    }
+})
 
 app.post('/chat', async (req, res) => {
     try {

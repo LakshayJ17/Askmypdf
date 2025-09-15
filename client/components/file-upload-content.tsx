@@ -9,18 +9,30 @@ import { useUser } from "@clerk/nextjs"
 import Navbar from "../components/navbar"
 import { BACKEND_URL } from "@/config"
 
-
+// --- PDF Upload Component ---
 const PdfUploadSection = ({
     userId,
     router,
+    fileName,
+    setFileName,
+    uploadStatus,
+    setUploadStatus,
+    isUploading,
+    setIsUploading,
+    isStartingChat,
+    setIsStartingChat,
 }: {
     userId: string | undefined;
     router: ReturnType<typeof useRouter>;
+    fileName: string;
+    setFileName: (v: string) => void;
+    uploadStatus: "idle" | "success" | "error";
+    setUploadStatus: (v: "idle" | "success" | "error") => void;
+    isUploading: boolean;
+    setIsUploading: (v: boolean) => void;
+    isStartingChat: boolean;
+    setIsStartingChat: (v: boolean) => void;
 }) => {
-    const [isUploading, setIsUploading] = useState(false)
-    const [uploadStatus, setUploadStatus] = useState<"idle" | "success" | "error">("idle")
-    const [fileName, setFileName] = useState<string>("")
-    const [isStartingChat, setIsStartingChat] = useState(false)
 
     const handleFileUploadButtonClick = () => {
         const el = document.createElement("input")
@@ -211,15 +223,22 @@ const PdfUploadSection = ({
     )
 }
 
+// --- URL Upload Component ---
 const UrlUploadSection = ({
     userId,
     router,
+    inputUrl,
+    setInputUrl,
+    status,
+    setStatus,
 }: {
     userId: string | undefined;
     router: ReturnType<typeof useRouter>;
+    inputUrl: string;
+    setInputUrl: (v: string) => void;
+    status: string;
+    setStatus: (v: string) => void;
 }) => {
-    const [inputUrl, setInputUrl] = useState("");
-    const [status, setStatus] = useState("");
 
     async function handleUrlUpload() {
         setStatus("Uploading...");
@@ -274,14 +293,25 @@ const FileUploadComponent = () => {
     const { user } = useUser();
     const userId = user?.id;
 
+    // Tab state: "pdf" or "url"
     const [activeTab, setActiveTab] = useState<"pdf" | "url">("pdf");
+
+    // PDF state
+    const [fileName, setFileName] = useState<string>("");
+    const [uploadStatus, setUploadStatus] = useState<"idle" | "success" | "error">("idle");
+    const [isUploading, setIsUploading] = useState(false);
+    const [isStartingChat, setIsStartingChat] = useState(false);
+
+    // URL state
+    const [inputUrl, setInputUrl] = useState("");
+    const [status, setStatus] = useState("");
 
     return (
         <div className="min-h-screen bg-black flex flex-col items-center overflow-hidden">
             <Navbar />
             <div className="flex-1 flex flex-col items-center justify-center w-full px-4 sm:px-0">
                 <div className="flex flex-col justify-center items-center z-10 w-full max-w-lg mx-auto">
-
+                    {/* Tab selector */}
                     <div className="flex justify-center gap-4 mb-8 w-full max-w-lg">
                         <Button
                             variant={activeTab === "pdf" ? "default" : "outline"}
@@ -304,13 +334,32 @@ const FileUploadComponent = () => {
                             URL
                         </Button>
                     </div>
-
-                    <div className="w-full">
-                        {activeTab === "pdf" ? (
-                            <PdfUploadSection userId={userId} router={router} />
-                        ) : (
-                            <UrlUploadSection userId={userId} router={router} />
-                        )}
+                    {/* Tab content: both components always mounted */}
+                    <div className="w-full relative">
+                        <div style={{ display: activeTab === "pdf" ? "block" : "none" }}>
+                            <PdfUploadSection
+                                userId={userId}
+                                router={router}
+                                fileName={fileName}
+                                setFileName={setFileName}
+                                uploadStatus={uploadStatus}
+                                setUploadStatus={setUploadStatus}
+                                isUploading={isUploading}
+                                setIsUploading={setIsUploading}
+                                isStartingChat={isStartingChat}
+                                setIsStartingChat={setIsStartingChat}
+                            />
+                        </div>
+                        <div style={{ display: activeTab === "url" ? "block" : "none" }}>
+                            <UrlUploadSection
+                                userId={userId}
+                                router={router}
+                                inputUrl={inputUrl}
+                                setInputUrl={setInputUrl}
+                                status={status}
+                                setStatus={setStatus}
+                            />
+                        </div>
                     </div>
                     <div className="text-center mt-6">
                         <p className="text-gray-500 text-xs">Supported format: PDF • Max size: 10MB</p>
