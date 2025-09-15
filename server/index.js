@@ -151,7 +151,7 @@ app.post('/upload/url', async (req, res) => {
             );
         }
 
-        return res.json({ message: "URL uploaded and processed successfully" });
+        return res.json({ message: "uploaded" });
     } catch (error) {
         console.error('Upload URL error:', error);
         return res.status(500).json({ message: "Error in parsing URL", error: error.message });

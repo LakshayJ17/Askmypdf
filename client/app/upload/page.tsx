@@ -78,15 +78,14 @@ const PdfUploadSection = ({
             <div className="p-8">
                 <div className="flex flex-col items-center text-center mb-6">
                     <div
-                        className={`p-4 rounded-2xl mb-4 transition-all duration-500 ${
-                            isUploading
+                        className={`p-4 rounded-2xl mb-4 transition-all duration-500 ${isUploading
                                 ? "bg-cyan-500/20 border-2 border-cyan-400/40 animate-pulse"
                                 : uploadStatus === "success"
-                                ? "bg-emerald-500/20 border-2 border-emerald-400/40"
-                                : uploadStatus === "error"
-                                ? "bg-red-500/20 border-2 border-red-400/40"
-                                : "bg-zinc-800 border-2 border-zinc-700 hover:border-cyan-400/40 hover:bg-cyan-500/10"
-                        }`}
+                                    ? "bg-emerald-500/20 border-2 border-emerald-400/40"
+                                    : uploadStatus === "error"
+                                        ? "bg-red-500/20 border-2 border-red-400/40"
+                                        : "bg-zinc-800 border-2 border-zinc-700 hover:border-cyan-400/40 hover:bg-cyan-500/10"
+                            }`}
                     >
                         {isUploading ? (
                             <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
@@ -102,30 +101,29 @@ const PdfUploadSection = ({
                         {isUploading
                             ? "Uploading..."
                             : uploadStatus === "success"
-                            ? "Upload Complete!"
-                            : uploadStatus === "error"
-                            ? "Upload Failed"
-                            : "Upload PDF Document"}
+                                ? "Upload Complete!"
+                                : uploadStatus === "error"
+                                    ? "Upload Failed"
+                                    : "Upload PDF Document"}
                     </h3>
                     <p className="text-gray-400 text-sm">
                         {isUploading
                             ? `Uploading ${fileName}...`
                             : uploadStatus === "success"
-                            ? `${fileName} uploaded successfully`
-                            : uploadStatus === "error"
-                            ? "Please try again"
-                            : "Select a PDF file to upload to your workspace"}
+                                ? `${fileName} uploaded successfully`
+                                : uploadStatus === "error"
+                                    ? "Please try again"
+                                    : "Select a PDF file to upload to your workspace"}
                     </p>
                 </div>
                 {uploadStatus !== "success" && (
                     <Button
                         onClick={handleFileUploadButtonClick}
                         disabled={isUploading}
-                        className={`w-full py-6 text-base font-semibold rounded-xl transition-all duration-300 ${
-                            isUploading
+                        className={`w-full py-6 text-base font-semibold rounded-xl transition-all duration-300 ${isUploading
                                 ? "bg-zinc-700 text-gray-400 cursor-not-allowed"
                                 : "bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 text-black shadow-lg hover:shadow-cyan-500/25"
-                        }`}
+                            }`}
                     >
                         <div className="flex items-center justify-center gap-3">
                             {isUploading ? (
@@ -147,11 +145,10 @@ const PdfUploadSection = ({
                         <Button
                             onClick={handleStartChatting}
                             disabled={isStartingChat}
-                            className={`w-full py-6 text-base font-semibold rounded-xl transition-all duration-500 ${
-                                isStartingChat
+                            className={`w-full py-6 text-base font-semibold rounded-xl transition-all duration-500 ${isStartingChat
                                     ? "bg-gradient-to-r from-cyan-600/80 to-cyan-700/80 text-white/80 cursor-not-allowed"
                                     : "bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 text-black shadow-lg hover:shadow-cyan-500/25"
-                            } animate-in slide-in-from-bottom-4 fade-in duration-500`}
+                                } animate-in slide-in-from-bottom-4 fade-in duration-500`}
                         >
                             <div className="flex items-center justify-center gap-3">
                                 {isStartingChat ? (
@@ -184,23 +181,21 @@ const PdfUploadSection = ({
                 )}
                 {fileName && (
                     <div
-                        className={`mt-4 p-3 rounded-lg border transition-all duration-300 ${
-                            uploadStatus === "success"
+                        className={`mt-4 p-3 rounded-lg border transition-all duration-300 ${uploadStatus === "success"
                                 ? "bg-emerald-500/10 border-emerald-400/30"
                                 : uploadStatus === "error"
-                                ? "bg-red-500/10 border-red-400/30"
-                                : "bg-zinc-800/40 border-zinc-700/40"
-                        }`}
+                                    ? "bg-red-500/10 border-red-400/30"
+                                    : "bg-zinc-800/40 border-zinc-700/40"
+                            }`}
                     >
                         <div className="flex items-center gap-3">
                             <FileText
-                                className={`w-4 h-4 ${
-                                    uploadStatus === "success"
+                                className={`w-4 h-4 ${uploadStatus === "success"
                                         ? "text-emerald-400"
                                         : uploadStatus === "error"
-                                        ? "text-red-400"
-                                        : "text-cyan-400"
-                                }`}
+                                            ? "text-red-400"
+                                            : "text-cyan-400"
+                                    }`}
                             />
                             <span className="text-white text-sm font-medium truncate">{fileName}</span>
                         </div>
@@ -211,6 +206,7 @@ const PdfUploadSection = ({
     )
 }
 
+
 const UrlUploadSection = ({
     userId,
     router,
@@ -219,50 +215,135 @@ const UrlUploadSection = ({
     router: ReturnType<typeof useRouter>;
 }) => {
     const [inputUrl, setInputUrl] = useState("");
-    const [status, setStatus] = useState("");
+    const [uploadStatus, setUploadStatus] = useState<"idle" | "success" | "error" | "uploading">("idle");
 
-    async function handleUrlUpload() {
-        setStatus("Uploading...");
+    const handleUrlUpload = async () => {
+        if (!inputUrl) return;
+
+        setUploadStatus("uploading");
         try {
             const response = await fetch(`${BACKEND_URL}/upload/url`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ inputUrl, userId }),
             });
             const data = await response.json();
-            setStatus("success");
+
+            if (!response.ok || data?.message !== "uploaded") {
+                console.error("Upload failed:", data?.error || data?.message);
+                setUploadStatus("error");
+            } else {
+                console.log("URL uploaded");
+                setUploadStatus("success");
+            }
         } catch (error) {
-            setStatus("Upload failed");
+            console.error("Upload failed:", error);
+            setUploadStatus("error");
         }
-    }
+    };
 
     return (
         <Card className="w-full max-w-lg mx-auto bg-zinc-900 border border-zinc-800 shadow-lg">
             <div className="p-8">
                 <div className="flex flex-col items-center text-center mb-6">
-                    <div className="p-4 rounded-2xl mb-4 bg-zinc-800 border-2 border-zinc-700">
-                        <Link className="w-8 h-8 text-cyan-400" />
+                    <div
+                        className={`p-4 rounded-2xl mb-4 transition-all duration-500 ${
+                            uploadStatus === "uploading"
+                                ? "bg-cyan-500/20 border-2 border-cyan-400/40 animate-pulse"
+                                : uploadStatus === "success"
+                                    ? "bg-emerald-500/20 border-2 border-emerald-400/40"
+                                    : uploadStatus === "error"
+                                        ? "bg-red-500/20 border-2 border-red-400/40"
+                                        : "bg-zinc-800 border-2 border-zinc-700 hover:border-cyan-400/40 hover:bg-cyan-500/10"
+                        }`}
+                    >
+                        {uploadStatus === "uploading" ? (
+                            <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+                        ) : uploadStatus === "success" ? (
+                            <CheckCircle className="w-8 h-8 text-emerald-400" />
+                        ) : uploadStatus === "error" ? (
+                            <AlertCircle className="w-8 h-8 text-red-400" />
+                        ) : (
+                            <Link className="w-8 h-8 text-cyan-400" />
+                        )}
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-2">Upload by URL</h3>
-                    <p className="text-gray-400 text-sm mb-2">Paste a public URL to extract and chat with its content.</p>
+                    <h3 className="text-xl font-bold text-white mb-2">
+                        {uploadStatus === "uploading"
+                            ? "Uploading..."
+                            : uploadStatus === "success"
+                                ? "Upload Complete!"
+                                : uploadStatus === "error"
+                                    ? "Upload Failed"
+                                    : "Upload via URL"}
+                    </h3>
+                    <p className="text-gray-400 text-sm">
+                        {uploadStatus === "uploading"
+                            ? `Uploading URL...`
+                            : uploadStatus === "success"
+                                ? `${inputUrl} uploaded successfully`
+                                : uploadStatus === "error"
+                                    ? "Please try again"
+                                    : "Paste a public URL to extract and chat with its content."}
+                    </p>
                 </div>
-                <input
-                    type="text"
-                    placeholder="Enter url"
-                    value={inputUrl}
-                    onChange={(e) => setInputUrl(e.target.value)}
-                    className="w-full p-2 rounded mb-4 bg-zinc-800 text-white border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                />
-                <Button onClick={handleUrlUpload} disabled={inputUrl === "" || status === "Uploading..."} className="w-full mb-2 bg-cyan-400 text-black font-semibold">
-                    Send
-                </Button>
-                <p className="text-gray-400">{status}</p>
-                {status === "success" && (
-                    <Button onClick={() => router.push('/chat')} className="w-full mt-2 bg-gradient-to-r from-cyan-500 to-cyan-600 text-black font-semibold">
-                        Chat
-                    </Button>
+
+                {uploadStatus !== "success" && (
+                    <div className="flex flex-col gap-3">
+                        <input
+                            type="text"
+                            placeholder="Enter URL"
+                            value={inputUrl}
+                            onChange={(e) => setInputUrl(e.target.value)}
+                            className="w-full p-3 rounded-xl bg-zinc-800 text-white border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                        />
+                        <Button
+                            onClick={handleUrlUpload}
+                            disabled={inputUrl === "" || uploadStatus === "uploading"}
+                            className={`w-full py-6 text-base font-semibold rounded-xl transition-all duration-300 ${
+                                uploadStatus === "uploading"
+                                    ? "bg-zinc-700 text-gray-400 cursor-not-allowed"
+                                    : "bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 text-black shadow-lg hover:shadow-cyan-500/25"
+                            }`}
+                        >
+                            <div className="flex items-center justify-center gap-3">
+                                {uploadStatus === "uploading" ? (
+                                    <>
+                                        <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                                        <span>Uploading...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Link className="w-5 h-5" />
+                                        <span>Send</span>
+                                    </>
+                                )}
+                            </div>
+                        </Button>
+                    </div>
+                )}
+
+                {uploadStatus === "success" && (
+                    <div className="space-y-4 mt-4">
+                        <Button
+                            onClick={() => router.push("/chat")}
+                            className="w-full py-6 text-base font-semibold rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 text-black shadow-lg hover:shadow-cyan-500/25 transition-all duration-300"
+                        >
+                            <div className="flex items-center justify-center gap-3">
+                                <MessageCircle className="w-5 h-5 animate-bounce" />
+                                <span>Start Chatting</span>
+                            </div>
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                setUploadStatus("idle")
+                                setInputUrl("")
+                            }}
+                            variant="outline"
+                            className="w-full py-3 text-sm font-medium rounded-xl bg-transparent border-zinc-700 text-gray-400 hover:bg-zinc-800 hover:text-white hover:border-zinc-600 transition-all duration-300"
+                        >
+                            Upload Another URL
+                        </Button>
+                    </div>
                 )}
             </div>
         </Card>
@@ -285,9 +366,8 @@ const FileUploadComponent = () => {
                     <div className="flex justify-center gap-4 mb-8 w-full max-w-lg">
                         <Button
                             variant={activeTab === "pdf" ? "default" : "outline"}
-                            className={`flex-1 flex items-center gap-2 px-6 py-2 rounded-xl font-semibold justify-center transition-all duration-200 ${
-                                activeTab === "pdf" ? "bg-cyan-600 text-white shadow" : "bg-zinc-900 text-cyan-400 border border-zinc-700"
-                            }`}
+                            className={`flex-1 flex items-center gap-2 px-6 py-2 rounded-xl font-semibold justify-center transition-all duration-200 ${activeTab === "pdf" ? "bg-cyan-600 text-white shadow" : "bg-zinc-900 text-cyan-400 border border-zinc-700"
+                                }`}
                             onClick={() => setActiveTab("pdf")}
                         >
                             <Upload className="w-5 h-5" />
@@ -295,9 +375,8 @@ const FileUploadComponent = () => {
                         </Button>
                         <Button
                             variant={activeTab === "url" ? "default" : "outline"}
-                            className={`flex-1 flex items-center gap-2 px-6 py-2 rounded-xl font-semibold justify-center transition-all duration-200 ${
-                                activeTab === "url" ? "bg-cyan-600 text-white shadow" : "bg-zinc-900 text-cyan-400 border border-zinc-700"
-                            }`}
+                            className={`flex-1 flex items-center gap-2 px-6 py-2 rounded-xl font-semibold justify-center transition-all duration-200 ${activeTab === "url" ? "bg-cyan-600 text-white shadow" : "bg-zinc-900 text-cyan-400 border border-zinc-700"
+                                }`}
                             onClick={() => setActiveTab("url")}
                         >
                             <Link className="w-5 h-5" />
